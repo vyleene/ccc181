@@ -45,12 +45,12 @@ It is 6:40 on a Tuesday evening and Mika has a free hour before her duty briefin
 | **Goals** | 1. Serve people in a fair order, matched to what they need (wash and dry, wash only, or dry only), without arguments.<br>2. Spend less time answering "whose turn is it?" and more time keeping machines running.<br>3. Handle people who don't show up without losing track of the line. |
 | **Frustrations** | 1. Students argue over who arrived first, and he is the one blamed (interview).<br>2. He keeps a handwritten list on a notebook page that gets wet, lost or messy (observation).<br>3. People walk away after being called, so he waits and then has to decide what to do with their place (observation). |
 | **Devices and context** | A shared tablet, phone (or the desk PC) at the counter. His hands are often wet or holding clothes, he stands up often, and the room is hot and noisy. |
-| **Tech comfort** | Low to medium. He uses Facebook Messenger and a basic phone daily, but he is not confident with new apps and worries about making a mistake that nobody can undo. |
+| **Tech comfort** | Low to medium. He uses Facebook Messenger and a basic phone daily |
 | **Accessibility needs** | Older eyes need large text and strong contrast. Wet or gloved fingers need large buttons with space between them to avoid wrong taps. A shared device means the screen must work in bright light and a noisy room. Labels should be in plain language, not technical terms. |
 
 ### Scenario
 
-It is a busy Sunday afternoon and eight people are waiting while Mang Ernie unloads a dryer. He glances at the counter tablet, where the staff dashboard is already open and shows each person's name, service and arrival time. A dryer is now free and the dashboard shows "Next: Jun, #3, Dry only" in large text, so he taps "Call next" and Jun's phone is notified. Five minutes later Jun has not arrived, so he taps "Remove" and the app marks him as a no-show. Then Jun comes up the stairs, so Mang Ernie taps "Undo" and Jun's place is restored. After Jun's clothes are now in the machine, Mang Ernie taps "Mark as served" which then removes Jun's place in the queue. He goes back to the machines without writing anything in his notebook.
+It is a busy Sunday afternoon and eight people are waiting while Mang Ernie unloads a dryer. He glances at the counter tablet, where the staff dashboard is already open and shows each person's name, service and arrival time. A dryer is now free and the dashboard shows "Next: Jun, #3, Dry only" in large text, so he taps "Call next" and Jun's phone is notified. Five minutes later Jun has not arrived, so he taps "Remove" and the app marks him as a no-show. Mang Ernie then calls Juan, Juan shows up, so he taps "Mark as served" which removes Juan from the queue.
 
 ### Top tasks in the app
 
@@ -58,11 +58,11 @@ It is a busy Sunday afternoon and eight people are waiting while Mang Ernie unlo
 | --- | --- | --- |
 | See the full queue in order, with each person's service | Staff dashboard | FR-05 |
 | Call the next person | Staff dashboard | FR-06 |
-| Skip or remove a no-show, mark someone as served, with undo | Staff dashboard | FR-07 |
+| Skip or remove a no-show, mark someone as served | Staff dashboard | FR-07 |
 
 ### What this means for my interface
 
 1. Because Mang Ernie has wet hands and older eyes, my interface must use large text, strong contrast and big buttons spaced far apart on the counter tablet.
 2. Because he is blamed for unfair order (interview), my interface must show the queue in a single, clear order with arrival times and the service each person needs, so everyone can see the same list.
 3. Because people walk away after being called (observation), my interface must let him remove a no-show in one tap and show a clear status for each person (waiting, called, no-show).
-4. Because he is not confident with new apps, my interface must use plain words ("Call", "Mark as served", "Remove"), and offer an easy undo for removing someone.
+4. Because he is not confident with new apps, my interface must use plain words ("Call", "Mark as served", "No-show").
