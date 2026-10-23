@@ -1,80 +1,61 @@
-/* Colors borrowed from the Week 2 slide deck */
 :root {
-  --navy: #16223A;
-  --paper: #F6F4EE;
-  --card: #FFFDF8;
-  --teal: #2D6F78;
-  --orange: #B4501E;
+  --laundry-blue: #155e75;
+  --laundry-blue-dark: #123b52;
+  --laundry-yellow: #f4b942;
+  --laundry-paper: #f5f5f5;
 }
 
 body {
-  margin: 0;
-  font-family: "IBM Plex Sans", Arial, sans-serif;
-  background: var(--paper);
-  color: #1B2438;
+  background: var(--laundry-paper);
+  color: #183642;
+  font-family: "Hanuman", serif;
 }
 
-header {
-  background: var(--navy);
-  color: var(--paper);
-  padding: 1.5rem 2rem;
+.laundry-navbar {
+  background: var(--laundry-blue-dark);
+  box-shadow: 0 4px 10px rgba(18, 59, 82, 0.2);
 }
 
-header h1 { margin: 0; }
-header a { color: var(--paper); text-decoration: none; }
-.tagline { margin: 0.25rem 0 0; color: #C5CEDD; }
-
-main {
-  max-width: 720px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+.laundry-navbar .navbar-brand {
+  letter-spacing: 0.02em;
 }
 
-h2 { color: var(--teal); }
-
-.tickets { list-style: none; padding: 0; }
-.tickets li {
-  background: var(--card);
-  border: 1px solid #E2DED3;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-}
-.tickets a { color: var(--orange); font-weight: 600; }
-
-code { background: #ECE8DE; padding: 0 0.3rem; border-radius: 4px; }
-
-footer {
-  text-align: center;
-  color: #5A6272;
-  padding: 2rem 0;
+.laundry-navbar .nav-link {
+  color: #dceff3;
 }
 
-/* Join-queue form */
-.button, .join-form button {
-  display: inline-block;
-  background: var(--teal);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1.2rem;
-  font: inherit;
-  text-decoration: none;
-  cursor: pointer;
+.laundry-navbar .nav-link:hover,
+.laundry-navbar .nav-link:focus {
+  color: #ffffff;
 }
 
-.join-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-width: 320px;
+.footer-container {
+  width: 100%;
+  background: #ffffff;
+  color: #55717b;
+  box-shadow: 0 -4px 10px rgba(18, 59, 82, 0.12);
 }
 
-.join-form input {
-  padding: 0.5rem;
-  border: 1px solid #C9C4B8;
-  border-radius: 6px;
-  font: inherit;
+.welcome-panel {
+  max-width: 700px;
+  padding: clamp(3rem, 12vw, 7rem) 1rem;
 }
 
-.error { color: var(--orange); font-weight: 600; }
+.eyebrow {
+  color: var(--laundry-blue);
+  letter-spacing: 0.12em;
+}
+
+.btn-laundry {
+  background: var(--laundry-yellow);
+  border-color: var(--laundry-yellow);
+  color: #183642;
+  font-weight: 700;
+}
+
+.btn-laundry:hover,
+.btn-laundry:focus {
+  background: #e4a72f;
+  border-color: #e4a72f;
+  color: #183642;
+}
