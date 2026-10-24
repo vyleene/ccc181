@@ -16,7 +16,7 @@
           <div class="alert alert-danger" role="alert">{{ error }}</div>
         {% endif %}
 
-        <form method="post" novalidate>
+        <form method="post" novalidate id="join-form">
           <div class="mb-3">
             <label class="form-label fw-semibold" for="name">Name</label>
             <input class="form-control form-control-lg{% if errors and errors.name %} is-invalid{% endif %}"
