@@ -4,6 +4,8 @@ Run it with:
     flask --app app run --debug
 then open http://127.0.0.1:5000
 """
+import re
+
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 
 app = Flask(__name__)
@@ -18,11 +20,11 @@ SERVICES = [
 ]
 
 TICKETS = [
-    {"number": 1, "name": "Mika", "service_id": 1, "status": "waiting"},
-    {"number": 2, "name": "Carlo", "service_id": 1, "status": "called"},
-    {"number": 3, "name": "Aling Nena", "service_id": 2, "status": "waiting"},
-    {"number": 4, "name": "Jun", "service_id": 2, "status": "no-show"},
-    {"number": 5, "name": "Bea", "service_id": 3, "status": "served"},
+    {"number": 1, "name": "Mika", "mobile_number": "09123456789", "service_id": 1, "status": "waiting"},
+    {"number": 2, "name": "Carlo", "mobile_number": "09123456789", "service_id": 1, "status": "called"},
+    {"number": 3, "name": "Aling Nena", "mobile_number": "09123456789", "service_id": 2, "status": "waiting"},
+    {"number": 4, "name": "Jun", "mobile_number": "09123456789", "service_id": 2, "status": "no-show"},
+    {"number": 5, "name": "Bea", "mobile_number": "09123456789", "service_id": 3, "status": "served"},
 ]
 
 
@@ -42,9 +44,35 @@ def ticket(ticket_id):
     abort(404)  # no ticket with that number
 
 
-@app.route("/join")
+@app.get("/join")
+def join_form():
+    return render_template("join.html", services=SERVICES, form={})
+
+
+@app.post("/join")
 def join():
-    return render_template("join.html")
+    form = request.form
+    name = form.get("name", "").strip()
+    mobile_number = form.get("mobile_number", "").strip()
+    service_id = form.get("service_id", type=int)
+
+    errors = {}
+    if not name:
+        errors["name"] = "Enter your name."
+    if not re.fullmatch(r"09\d{9}", mobile_number):
+        errors["mobile_number"] = "Enter an 11-digit mobile number starting with 09."
+    if service_id not in [s["id"] for s in SERVICES]:
+        errors["service_id"] = "Choose a service."
+
+    if errors:
+        flash("Please fix the highlighted fields.", "danger")
+        return render_template("join.html", services=SERVICES, form=form, errors=errors), 400
+
+    number = TICKETS[-1]["number"] + 1 if TICKETS else 1
+    TICKETS.append({"number": number, "name": name, "mobile_number": mobile_number,
+                    "service_id": service_id, "status": "waiting"})
+    flash(f"You joined the queue. Your ticket is #{number}.", "success")
+    return redirect(url_for("ticket", ticket_id=number))
 
 
 @app.route("/staff")
