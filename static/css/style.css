@@ -62,6 +62,98 @@ body {
   box-shadow: 0 0 0 0.25rem rgba(21, 94, 117, 0.15);
 }
 
+.ticket-page {
+  min-height: 100%;
+  padding: 1rem 0 2rem;
+}
+
+.ticket-card {
+  width: min(100%, 34rem);
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 1rem 2.5rem rgba(18, 59, 82, 0.12) !important;
+}
+
+.ticket-card-header {
+  background: var(--laundry-blue-dark);
+  color: #dceff3;
+  letter-spacing: 0.04em;
+}
+
+.ticket-card-header span:last-child {
+  color: #9fc2cb;
+  font-weight: 400;
+}
+
+.ticket-number {
+  color: var(--laundry-blue);
+  font-size: clamp(4rem, 15vw, 7rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-shadow: 0.06em 0.06em 0 rgba(244, 185, 66, 0.35);
+}
+
+.ticket-service {
+  border-bottom: 1px solid #e3ecee;
+  padding-bottom: 1.25rem;
+}
+
+.ticket-status-panel,
+.ticket-position-panel {
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.ticket-status-panel {
+  background: #f2f8f9;
+}
+
+.ticket-position-panel {
+  background: #fff8e6;
+}
+
+.ticket-details {
+  border-top: 1px solid #e3ecee;
+  color: var(--laundry-blue-dark);
+  font-size: 0.875rem;
+}
+
+.ticket-details strong {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.ticket-action {
+  margin-top: 1.75rem;
+}
+
+.ticket-status {
+  font-size: 0.95rem;
+  padding: 0.55rem 1rem;
+}
+
+.ticket-status-waiting {
+  background: var(--laundry-blue);
+}
+
+.ticket-status-called {
+  background: #d89100;
+  color: #ffffff;
+}
+
+.ticket-status-served {
+  background: #27815a;
+}
+
+.ticket-status-no-show {
+  background: #687980;
+}
+
+.ticket-position {
+  color: var(--laundry-blue-dark);
+}
+
 .eyebrow {
   color: var(--laundry-blue);
   letter-spacing: 0.12em;
