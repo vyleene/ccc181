@@ -41,6 +41,135 @@ body {
   padding: clamp(3rem, 12vw, 7rem) 1rem;
 }
 
+.staff-page {
+  padding: 1rem 0 2rem;
+}
+
+.staff-call-card {
+  border-radius: 1rem;
+  background: #ffffff;
+}
+
+.staff-call-details {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.staff-call-details dt {
+  color: #55717b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.staff-call-details dd {
+  margin: 0.15rem 0 0;
+  font-weight: 700;
+}
+
+.staff-next-number {
+  color: var(--laundry-blue);
+  font-size: clamp(3.5rem, 9vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  text-shadow: 0.06em 0.06em 0 rgba(244, 185, 66, 0.35);
+}
+
+.staff-empty-state {
+  border: 1px dashed #b8cdd2;
+  border-radius: 0.85rem;
+  background: #ffffff;
+}
+
+.staff-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: #dff1e8;
+  color: #27815a;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.staff-table-responsive {
+  min-width: 0;
+  max-height: 25rem;
+  overflow-x: auto;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.staff-queue-card {
+  overflow: hidden;
+}
+
+.staff-table {
+  width: 100%;
+  table-layout: fixed;
+  margin: 0;
+}
+
+.staff-table th,
+.staff-table td {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.staff-table-actions {
+  justify-content: center;
+}
+
+.staff-table-actions,
+.staff-table-actions form {
+  min-width: 0;
+}
+
+@media (max-width: 767.98px) {
+  .staff-call-card .card-body {
+    padding: 1.25rem 1rem !important;
+  }
+
+  .staff-call-card .row {
+    row-gap: 1.25rem !important;
+  }
+
+  .staff-next-number {
+    font-size: clamp(3.5rem, 20vw, 5rem);
+  }
+
+  .staff-call-details {
+    flex-direction: column;
+    gap: 0.65rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  .staff-call-card .col-md-6 {
+    text-align: center;
+  }
+
+  .staff-table th,
+  .staff-table td {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .staff-table {
+    min-width: 42rem;
+    table-layout: auto;
+  }
+
+  .staff-call-card .btn {
+    width: 100%;
+  }
+
+}
+
 .join-page {
   min-height: 100%;
   padding: 1rem 0 2rem;
@@ -78,11 +207,6 @@ body {
   background: var(--laundry-blue-dark);
   color: #dceff3;
   letter-spacing: 0.04em;
-}
-
-.ticket-card-header span:last-child {
-  color: #9fc2cb;
-  font-weight: 400;
 }
 
 .ticket-number {

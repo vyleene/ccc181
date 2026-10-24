@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Staff dashboard · LaundryQ{% endblock %}
+
+{% block content %}
+  {% set next_ticket = queue|selectattr("status", "equalto", "waiting")|first %}
+  <section class="staff-page">
+    <header class="mb-4">
+      <h1 class="h2 fw-bold mb-1">Staff Dashboard</h1>
+      <p class="text-secondary mb-0">Manage the laundry queue and serve residents efficiently.</p>
+    </header>
+
+    <div class="staff-call-card card border-0 shadow-sm mb-4">
+      <div class="card-body p-3 p-md-4">
+        {% if next_ticket %}
+          <div class="row align-items-center g-2">
+            <div class="col-md-3 text-center">
+              <div class="staff-next-number">#{{ next_ticket.number }}</div>
+            </div>
+            <div class="col-md-6">
+              <h1 class="h4 fw-bold mb-3">{{ next_ticket.name }}</h1>
+              <dl class="staff-call-details mb-0">
+                <div>
+                  <dt>Service</dt>
+                  <dd>{{ names[next_ticket.service_id] }}</dd>
+                </div>
+                <div>
+                  <dt>Mobile number</dt>
+                  <dd>{{ next_ticket.mobile_number }}</dd>
+                </div>
+              </dl>
+            </div>
+            <div class="col-md-3 text-center">
+              <form method="post"
+                  action="{{ url_for('staff_action', ticket_id=next_ticket.number, action='call') }}">
+                <button class="btn btn-laundry btn-lg px-4" type="submit">Call Next</button>
+              </form>
+            </div>
+          </div>
+        {% else %}
+          <div class="staff-empty-state text-center p-4">
+            <div class="staff-empty-icon mb-3" aria-hidden="true">✓</div>
+            <h2 class="h4 fw-bold">No one is waiting</h2>
+            <p class="text-secondary mb-0">The queue is clear for this service.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="staff-queue-card card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex flex-column flex-md-row
+          justify-content-between align-items-md-center gap-3 px-3 px-md-4 py-3">
+        <h2 class="h5 mb-0">Current laundry queue</h2>
+        <form class="d-flex align-items-center gap-2" method="get"
+            action="{{ url_for('staff_dashboard') }}">
+          <label class="small fw-bold text-secondary" for="service-filter">Service</label>
+          <select class="form-select form-select-sm" id="service-filter" name="service_id"
+              aria-label="Filter queue by service" onchange="this.form.submit()">
+            <option value="">All services</option>
+            {% for service in services %}
+              <option value="{{ service.id }}"
+                  {% if selected == service.id %}selected{% endif %}>
+                {{ service.name }}
+              </option>
+            {% endfor %}
+          </select>
+          <noscript>
+            <button class="btn btn-sm btn-outline-secondary" type="submit">Filter</button>
+          </noscript>
+        </form>
+      </div>
+      <div class="card-body p-0">
+        {% if page_queue %}
+          <div class="table-responsive staff-table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0 staff-table">
+              <caption class="visually-hidden">Current laundry queue</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Number</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Service</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ticket in page_queue %}
+                  <tr>
+                    <th scope="row">#{{ ticket.number }}</th>
+                    <td>{{ ticket.name }}</td>
+                    <td>{{ names[ticket.service_id] }}</td>
+                    <td>
+                      {% if ticket.status == "waiting" %}
+                        <span class="badge ticket-status-waiting">Waiting</span>
+                      {% else %}
+                        <span class="badge ticket-status-called">Called</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="d-flex flex-wrap gap-2 staff-table-actions">
+                        <form method="post"
+                            action="{{ url_for('staff_action', ticket_id=ticket.number, action='serve') }}">
+                          <button class="btn btn-sm btn-success" type="submit"
+                              aria-label="Mark ticket {{ ticket.number }} as served">Serve</button>
+                        </form>
+                        <form method="post"
+                            action="{{ url_for('staff_action', ticket_id=ticket.number, action='no-show') }}">
+                          <button class="btn btn-sm btn-outline-danger" type="submit"
+                              aria-label="Mark ticket {{ ticket.number }} as no-show">No-show</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="staff-empty-state text-center p-5">
+            <div class="staff-empty-icon mb-3" aria-hidden="true">✓</div>
+            <h2 class="h4 fw-bold">No one is waiting</h2>
+            <p class="text-secondary mb-0">The queue is clear for this service.</p>
+          </div>
+        {% endif %}
+      </div>
+      <div class="card-footer bg-white d-flex flex-column flex-md-row
+          justify-content-between align-items-md-center gap-3 px-3 px-md-4 py-3">
+        <span class="text-secondary small">
+          Total tickets: <strong>{{ queue|length }}</strong>
+        </span>
+        <nav aria-label="Queue pages">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item{% if page == 1 %} disabled{% endif %}">
+              <a class="page-link"
+                  href="{{ url_for('staff_dashboard', page=page - 1, service_id=selected) }}"
+                  aria-label="Previous page">Previous</a>
+            </li>
+            {% for page_number in range(1, total_pages + 1) %}
+              <li class="page-item{% if page_number == page %} active{% endif %}"
+                  {% if page_number == page %}aria-current="page"{% endif %}>
+                <a class="page-link"
+                    href="{{ url_for('staff_dashboard', page=page_number, service_id=selected) }}">
+                  {{ page_number }}
+                </a>
+              </li>
+            {% endfor %}
+            <li class="page-item{% if page == total_pages %} disabled{% endif %}">
+              <a class="page-link"
+                  href="{{ url_for('staff_dashboard', page=page + 1, service_id=selected) }}"
+                  aria-label="Next page">Next</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </section>
+{% endblock %}
