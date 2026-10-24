@@ -125,9 +125,24 @@ body {
   justify-content: center;
 }
 
+.staff-table-actions .btn {
+  min-height: 2.75rem;
+}
+
 .staff-table-actions,
 .staff-table-actions form {
   min-width: 0;
+}
+
+.pagination .page-link {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.navbar-toggler {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
 }
 
 @media (max-width: 767.98px) {
