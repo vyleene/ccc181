@@ -101,7 +101,7 @@
                         <form method="post"
                             action="{{ url_for('staff_action', ticket_id=ticket.number, action='serve') }}">
                           <button class="btn btn-sm btn-success" type="submit"
-                              aria-label="Mark ticket {{ ticket.number }} as served">Serve</button>
+                              aria-label="Mark ticket {{ ticket.number }} as served">Mark as served</button>
                         </form>
                         <form method="post"
                             action="{{ url_for('staff_action', ticket_id=ticket.number, action='no-show') }}">
