@@ -8,7 +8,7 @@
 - **Student ID:** 2024-1557
 - **Section:** CS3A
 - **Date:** October 25, 2026
-- **Pull request:** ![Pull Request](https://github.com/vyleene/ccc181/pull/2)
+- **Pull request:** [#2](https://github.com/vyleene/ccc181/pull/2)
 
 ## Personas
 
@@ -97,6 +97,20 @@ fix, the action wording did not match the task language closely enough. After
 the fix, the action explicitly states the intended result and matches its
 ticket-specific accessible label. See [usability-test.md](usability-test.md).
 
+### Before the change
+
+The staff queue used the shorter **Serve** label, which caused the participant
+to hesitate before completing the task.
+
+![Staff dashboard before the change](screenshots/before-change.png)
+
+### After the change
+
+The staff queue now uses **Mark as served**, making the intended action
+explicit and consistent with the task instruction.
+
+![Staff dashboard after the change](screenshots/after-change.png)
+
 ## Reflection
 
 The hardest part this week was balancing a fast staff workflow with a compact,
@@ -119,4 +133,4 @@ Select one option:
 
 **Purpose**: Help brainstorm in making the personas for the laundry queue app, debugging whenever errors occurred, css media controls (for mobile view), and help on making markdown reports.
 
-**How output was checked or revised**: Checked for any persona scope that is outside my reach or hard to attain, used real data and let the AI format and how to display it in a clean way. Revised any code that looks complex or a code that I can not replicate without AI and wrote them in my own style.
+**How output was checked or revised**: Checked for any persona scope that is outside my reach or hard to attain, used real data and let the AI format and how to structure it in a clean way. Revised any code that looks complex or a code that I can not replicate without AI and wrote them in my own style.
