@@ -1,0 +1,1 @@
+LaundryQ is a Flask and Jinja2 laundry queue system for a dormitory laundry room, where residents can join a service queue and staff can manage it; install the dependencies with `pip install -r requirements.txt`, then run the app with `flask --app app run` and open `http://127.0.0.1:5000` in a browser.
