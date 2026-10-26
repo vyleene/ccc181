@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Join the queue · LaundryQ{% endblock %}
+
+{% block content %}
+  <div class="join-page d-flex align-items-center justify-content-center">
+    <div class="card join-card border-0 shadow-sm">
+      <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-4">
+          <p class="eyebrow text-uppercase fw-semibold mb-2">LaundryQ</p>
+          <h1 class="h2 fw-bold mb-2">Join the queue</h1>
+          <p class="text-secondary mb-0">Tell us a little about yourself to get started.</p>
+        </div>
+
+        {% if error %}
+          <div class="alert alert-danger" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" novalidate id="join-form">
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="name">Name</label>
+            <input class="form-control form-control-lg{% if errors and errors.name %} is-invalid{% endif %}"
+                id="name" name="name" type="text" value="{{ form.get('name', '') }}"
+                autocomplete="name" autofocus>
+            {% if errors and errors.name %}
+              <div class="invalid-feedback">{{ errors.name }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="mobile_number">Mobile Number</label>
+            <input class="form-control form-control-lg{% if errors and errors.mobile_number %} is-invalid{% endif %}"
+                id="mobile_number" name="mobile_number" type="tel"
+                placeholder="09xxxxxxxxx"
+                pattern="09[0-9]{9}" maxlength="11" inputmode="numeric"
+                value="{{ form.get('mobile_number', '') }}" autocomplete="tel">
+            {% if errors and errors.mobile_number %}
+              <div class="invalid-feedback">{{ errors.mobile_number }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold" for="service_id">Service</label>
+            <select class="form-select form-select-lg{% if errors and errors.service_id %} is-invalid{% endif %}"
+                id="service_id" name="service_id">
+              <option value="">Choose a service</option>
+              {% for service in services %}
+                <option value="{{ service.id }}"
+                    {% if form.get('service_id', '')|int == service.id %}selected{% endif %}>
+                  {{ service.name }}
+                </option>
+              {% endfor %}
+            </select>
+            {% if errors and errors.service_id %}
+              <div class="invalid-feedback">{{ errors.service_id }}</div>
+            {% endif %}
+          </div>
+
+          <button class="btn btn-laundry btn-lg w-100" type="submit">Get a ticket</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,313 @@
+:root {
+  --laundry-blue: #155e75;
+  --laundry-blue-dark: #123b52;
+  --laundry-yellow: #f4b942;
+  --laundry-paper: #f5f5f5;
+}
+
+body {
+  background: var(--laundry-paper);
+  color: #183642;
+  font-family: "Hanuman", serif;
+}
+
+.laundry-navbar {
+  background: var(--laundry-blue-dark);
+  box-shadow: 0 4px 10px rgba(18, 59, 82, 0.2);
+}
+
+.laundry-navbar .navbar-brand {
+  letter-spacing: 0.02em;
+}
+
+.laundry-navbar .nav-link {
+  color: #dceff3;
+}
+
+.laundry-navbar .nav-link:hover,
+.laundry-navbar .nav-link:focus {
+  color: #ffffff;
+}
+
+.footer-container {
+  width: 100%;
+  background: #ffffff;
+  color: #55717b;
+  box-shadow: 0 -4px 10px rgba(18, 59, 82, 0.12);
+}
+
+.welcome-panel {
+  max-width: 700px;
+  padding: clamp(3rem, 12vw, 7rem) 1rem;
+}
+
+.staff-page {
+  padding: 1rem 0 2rem;
+}
+
+.staff-call-card {
+  border-radius: 1rem;
+  background: #ffffff;
+}
+
+.staff-call-details {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.staff-call-details dt {
+  color: #55717b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.staff-call-details dd {
+  margin: 0.15rem 0 0;
+  font-weight: 700;
+}
+
+.staff-next-number {
+  color: var(--laundry-blue);
+  font-size: clamp(3.5rem, 9vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  text-shadow: 0.06em 0.06em 0 rgba(244, 185, 66, 0.35);
+}
+
+.staff-empty-state {
+  border: 1px dashed #b8cdd2;
+  border-radius: 0.85rem;
+  background: #ffffff;
+}
+
+.staff-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: #dff1e8;
+  color: #27815a;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.staff-table-responsive {
+  min-width: 0;
+  max-height: 25rem;
+  overflow-x: auto;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.staff-queue-card {
+  overflow: hidden;
+}
+
+.staff-table {
+  width: 100%;
+  table-layout: fixed;
+  margin: 0;
+}
+
+.staff-table th,
+.staff-table td {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.staff-table-actions {
+  justify-content: center;
+}
+
+.staff-table-actions .btn {
+  min-height: 2.75rem;
+}
+
+.staff-table-actions,
+.staff-table-actions form {
+  min-width: 0;
+}
+
+.pagination .page-link {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.navbar-toggler {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+
+@media (max-width: 767.98px) {
+  .staff-call-card .card-body {
+    padding: 1.25rem 1rem !important;
+  }
+
+  .staff-call-card .row {
+    row-gap: 1.25rem !important;
+  }
+
+  .staff-next-number {
+    font-size: clamp(3.5rem, 20vw, 5rem);
+  }
+
+  .staff-call-details {
+    flex-direction: column;
+    gap: 0.65rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  .staff-call-card .col-md-6 {
+    text-align: center;
+  }
+
+  .staff-table th,
+  .staff-table td {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .staff-table {
+    min-width: 42rem;
+    table-layout: auto;
+  }
+
+  .staff-call-card .btn {
+    width: 100%;
+  }
+
+}
+
+.join-page {
+  min-height: 100%;
+  padding: 1rem 0 2rem;
+}
+
+.join-card {
+  width: min(100%, 34rem);
+  border-radius: 1rem;
+}
+
+.join-card .form-control,
+.join-card .form-select {
+  border-color: #c8d8dd;
+}
+
+.join-card .form-control:focus,
+.join-card .form-select:focus {
+  border-color: var(--laundry-blue);
+  box-shadow: 0 0 0 0.25rem rgba(21, 94, 117, 0.15);
+}
+
+.ticket-page {
+  min-height: 100%;
+  padding: 1rem 0 2rem;
+}
+
+.ticket-card {
+  width: min(100%, 34rem);
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 1rem 2.5rem rgba(18, 59, 82, 0.12) !important;
+}
+
+.ticket-card-header {
+  background: var(--laundry-blue-dark);
+  color: #dceff3;
+  letter-spacing: 0.04em;
+}
+
+.ticket-number {
+  color: var(--laundry-blue);
+  font-size: clamp(4rem, 15vw, 7rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-shadow: 0.06em 0.06em 0 rgba(244, 185, 66, 0.35);
+}
+
+.ticket-service {
+  border-bottom: 1px solid #e3ecee;
+  padding-bottom: 1.25rem;
+}
+
+.ticket-status-panel,
+.ticket-position-panel {
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.ticket-status-panel {
+  background: #f2f8f9;
+}
+
+.ticket-position-panel {
+  background: #fff8e6;
+}
+
+.ticket-details {
+  border-top: 1px solid #e3ecee;
+  color: var(--laundry-blue-dark);
+  font-size: 0.875rem;
+}
+
+.ticket-details strong {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.ticket-action {
+  margin-top: 1.75rem;
+}
+
+.ticket-status {
+  font-size: 0.95rem;
+  padding: 0.55rem 1rem;
+}
+
+.ticket-status-waiting {
+  background: var(--laundry-blue);
+}
+
+.ticket-status-called {
+  background: #d89100;
+  color: #ffffff;
+}
+
+.ticket-status-served {
+  background: #27815a;
+}
+
+.ticket-status-no-show {
+  background: #687980;
+}
+
+.ticket-position {
+  color: var(--laundry-blue-dark);
+}
+
+.eyebrow {
+  color: var(--laundry-blue);
+  letter-spacing: 0.12em;
+}
+
+.btn-laundry {
+  background: var(--laundry-yellow);
+  border-color: var(--laundry-yellow);
+  color: #183642;
+  font-weight: 700;
+}
+
+.btn-laundry:hover,
+.btn-laundry:focus {
+  background: #e4a72f;
+  border-color: #e4a72f;
+  color: #183642;
+}

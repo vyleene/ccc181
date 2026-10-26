@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}LaundryQ · Join the queue{% endblock %}
+
+{% block content %}
+  <section class="welcome-panel text-center mx-auto">
+    <p class="eyebrow text-uppercase fw-semibold mb-2">Welcome to LaundryQ</p>
+    <h1 class="display-4 fw-bold">Laundry day, made simple.</h1>
+    <p class="lead text-secondary mx-auto mb-4">
+      Join the laundry queue online and spend less time waiting in line.
+    </p>
+    <a class="btn btn-laundry btn-lg px-4" href="{{ url_for('join') }}">Join the Queue</a>
+  </section>
+{% endblock %}
