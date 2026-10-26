@@ -74,3 +74,7 @@ improvement that does not change the existing workflow.
   before connecting it to “mark them as served.”
 - **After:** The row action is labeled **Mark as served**, making the intended
   action explicit.
+
+![Staff dashboard before the change](screenshots/before-change.png)
+
+![Staff dashboard after the change](screenshots/after-change.png)
