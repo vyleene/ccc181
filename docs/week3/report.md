@@ -8,7 +8,7 @@
 - **Student ID:** 2024-1557
 - **Section:** CS3A
 - **Date:** October 25, 2026
-- **Pull request:** 
+- **Pull request:** ![Pull Request](https://github.com/vyleene/ccc181/pull/2)
 
 ## Personas
 
@@ -116,5 +116,5 @@ Select one option:
 - [x] One or more members used generative AI tools. Details are provided below.
 
 Tool used: ChatGPT 5.6 Luna
-Purpose: Help brainstorm in making the personas for the laundry queue app, and debugging whenever errors occurred.
-How output was checked or revised: Check for any persona scope that is outside my reach or hard to attain.
+Purpose: Help brainstorm in making the personas for the laundry queue app, debugging whenever errors occurred, css media controls (for mobile view), and help on making markdown reports.
+How output was checked or revised: Checked for any persona scope that is outside my reach or hard to attain, used real data and let the AI format and how to display it in a clean way. Revised any code that looks complex or a code that I can not replicate without AI and wrote them in my own style.
