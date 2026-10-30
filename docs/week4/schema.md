@@ -29,14 +29,14 @@
 | --- | --- | --- | --- | --- |
 | `users` | `id` | `integer GENERATED ALWAYS AS IDENTITY` | PRIMARY KEY | Gives every person a stable database identifier. |
 | `users` | `name` | `varchar(120)` | NOT NULL | A resident or staff member must have a display name. |
-| `users` | `mobile_number` | `varchar(11)` | UNIQUE, CHECK (mobile number is NULL or matches `09` followed by 9 digits) | Stores a resident contact without losing its leading zero; staff do not need a mobile number to manage the queue. |
+| `users` | `mobile_number` | `varchar(11)` | UNIQUE, CHECK (mobile number is NULL or matches `09` followed by 9 digits), CHECK (role = `'staff'` OR mobile_number IS NOT NULL) | Stores a resident contact without losing its leading zero; staff do not need a mobile number to manage the queue. |
 | `users` | `role` | `varchar(20)` | NOT NULL, DEFAULT `'resident'`, CHECK (role IN (`'resident'`, `'staff'`)) | Restricts people to supported application roles. |
 | `services` | `id` | `integer GENERATED ALWAYS AS IDENTITY` | PRIMARY KEY | Gives every laundry service a stable identifier. |
 | `services` | `name` | `varchar(80)` | NOT NULL UNIQUE | Prevents duplicate service names when staff manage services. |
 | `services` | `active` | `boolean` | NOT NULL DEFAULT `true` | Allows staff to switch a service off without deleting its history. |
 | `tickets` | `id` | `bigint GENERATED ALWAYS AS IDENTITY` | PRIMARY KEY | Provides a unique, never-reused ticket number. |
-| `tickets` | `user_id` | `integer` | NOT NULL, FOREIGN KEY REFERENCES `users(id)` | Connects each ticket to the resident who joined. |
-| `tickets` | `service_id` | `integer` | NOT NULL, FOREIGN KEY REFERENCES `services(id)` | Prevents a ticket from referring to a missing service. |
+| `tickets` | `user_id` | `integer` | NOT NULL, FOREIGN KEY REFERENCES `users(id)` ON DELETE RESTRICT | Connects each ticket to the resident who joined without allowing history to be deleted accidentally. |
+| `tickets` | `service_id` | `integer` | NOT NULL, FOREIGN KEY REFERENCES `services(id)` ON DELETE RESTRICT | Prevents a ticket from referring to a missing service and preserves old service reports. |
 | `tickets` | `status` | `varchar(20)` | NOT NULL DEFAULT `'waiting'`, CHECK (status IN (`'waiting'`, `'called'`, `'served'`, `'no-show'`, `'left'`)) | Allows only known queue states. |
 | `tickets` | `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` | Stores the time the resident joined and preserves fair ordering across time zones. |
 | `tickets` | `called_at` | `timestamptz` | NULL | Records when staff called the resident. |
