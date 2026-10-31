@@ -6,8 +6,14 @@
   {% set next_ticket = queue|selectattr("status", "equalto", "waiting")|first %}
   <section class="staff-page">
     <header class="mb-4">
-      <h1 class="h2 fw-bold mb-1">Staff Dashboard</h1>
-      <p class="text-secondary mb-0">Manage the laundry queue and serve residents efficiently.</p>
+      <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+        <div>
+          <h1 class="h2 fw-bold mb-1">Staff Dashboard</h1>
+          <p class="text-secondary mb-0">Manage the laundry queue and serve residents efficiently.</p>
+        </div>
+        <a class="btn btn-outline-secondary align-self-start"
+            href="{{ url_for('services_list') }}">Manage services</a>
+      </div>
     </header>
 
     <div class="staff-call-card card border-0 shadow-sm mb-4">
@@ -109,6 +115,12 @@
                             action="{{ url_for('staff_action', ticket_id=ticket.id, action='no-show') }}">
                           <button class="btn btn-sm btn-outline-danger" type="submit"
                               aria-label="Mark ticket {{ ticket.id }} as no-show">No-show</button>
+                        </form>
+                        <form method="post"
+                            action="{{ url_for('delete_ticket', ticket_id=ticket.id) }}"
+                            data-confirm="Delete ticket {{ ticket.id }}? This cannot be undone.">
+                          <button class="btn btn-sm btn-outline-secondary" type="submit"
+                              aria-label="Delete ticket {{ ticket.id }}">Delete</button>
                         </form>
                       </div>
                     </td>
