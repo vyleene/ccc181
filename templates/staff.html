@@ -15,24 +15,24 @@
         {% if next_ticket %}
           <div class="row align-items-center g-2">
             <div class="col-md-3 text-center">
-              <div class="staff-next-number">#{{ next_ticket.number }}</div>
+              <div class="staff-next-number">#{{ next_ticket.id }}</div>
             </div>
             <div class="col-md-6">
-              <h2 class="h4 fw-bold mb-3">{{ next_ticket.name }}</h2>
+              <h2 class="h4 fw-bold mb-3">{{ next_ticket.user.name }}</h2>
               <dl class="staff-call-details mb-0">
                 <div>
                   <dt>Service</dt>
-                  <dd>{{ names[next_ticket.service_id] }}</dd>
+                  <dd>{{ next_ticket.service.name }}</dd>
                 </div>
                 <div>
                   <dt>Mobile number</dt>
-                  <dd>{{ next_ticket.mobile_number }}</dd>
+                  <dd>{{ next_ticket.user.mobile_number }}</dd>
                 </div>
               </dl>
             </div>
             <div class="col-md-3 text-center">
               <form method="post"
-                  action="{{ url_for('staff_action', ticket_id=next_ticket.number, action='call') }}">
+                  action="{{ url_for('staff_action', ticket_id=next_ticket.id, action='call') }}">
                 <button class="btn btn-laundry btn-lg px-4" type="submit">Call Next</button>
               </form>
             </div>
@@ -70,7 +70,7 @@
         </form>
       </div>
       <div class="card-body p-0">
-        {% if page_queue %}
+        {% if queue %}
           <div class="table-responsive staff-table-responsive">
             <table class="table table-striped table-hover align-middle mb-0 staff-table">
               <caption class="visually-hidden">Current laundry queue</caption>
@@ -79,6 +79,7 @@
                   <th scope="col">Number</th>
                   <th scope="col">Name</th>
                   <th scope="col">Service</th>
+                  <th scope="col">Joined</th>
                   <th scope="col">Status</th>
                   <th scope="col">Actions</th>
                 </tr>
@@ -87,8 +88,9 @@
                 {% for ticket in page_queue %}
                   <tr>
                     <th scope="row">#{{ ticket.id }}</th>
-                    <td>{{ ticket.name }}</td>
-                    <td>{{ names[ticket.service_id] }}</td>
+                    <td>{{ ticket.user.name }}</td>
+                    <td>{{ ticket.service.name }}</td>
+                    <td>{{ ticket.created_at|local }}</td>
                     <td>
                       {% if ticket.status == "waiting" %}
                         <span class="badge ticket-status-waiting">Waiting</span>

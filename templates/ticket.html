@@ -54,11 +54,15 @@
           <div class="ticket-details text-start p-2 mb-3">
             <div class="d-flex justify-content-between gap-3">
               <span class="text-secondary">Name</span>
-              <strong>{{ ticket.name }}</strong>
+              <strong>{{ ticket.user.name }}</strong>
             </div>
             <div class="d-flex justify-content-between gap-3 mt-1">
               <span class="text-secondary">Mobile number</span>
-              <strong>{{ ticket.mobile_number }}</strong>
+              <strong>{{ ticket.user.mobile_number }}</strong>
+            </div>
+            <div class="d-flex justify-content-between gap-3 mt-1">
+              <span class="text-secondary">Joined</span>
+              <strong>{{ ticket.created_at|local }}</strong>
             </div>
           </div>
         </div>

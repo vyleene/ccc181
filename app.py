@@ -6,10 +6,12 @@ then open http://127.0.0.1:5000
 """
 import os
 import re
+from datetime import timedelta, timezone
 
 from dotenv import load_dotenv
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 from flask_migrate import Migrate
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from models import Service, Ticket, User, db
@@ -23,6 +25,13 @@ app.config["SQLALCHEMY_ECHO"] = os.environ.get("SQLALCHEMY_ECHO") == "1"
 
 db.init_app(app)
 migrate = Migrate(app, db)
+PH_TIME = timezone(timedelta(hours=8))
+
+
+@app.template_filter("local")
+def local_time(value):
+    """Show a database time in Philippine time."""
+    return value.astimezone(PH_TIME).strftime("%b %d, %I:%M %p") if value else ""
 
 @app.cli.command("seed")
 def seed():
@@ -45,25 +54,32 @@ def index():
 
 @app.get("/queue/<int:ticket_id>")
 def ticket(ticket_id):
-    t = next((t for t in TICKETS if t["number"] == ticket_id), None)
-    if t is None:
-        abort(404)
-    ahead = [x for x in TICKETS
-             if x["service_id"] == t["service_id"]
-             and x["status"] == "waiting"
-             and x["number"] < t["number"]]
-    service = next(s for s in SERVICES if s["id"] == t["service_id"])
-    return render_template("ticket.html", ticket=t, service=service, ahead=len(ahead))
+    t = db.get_or_404(Ticket, ticket_id)
+    return render_template(
+        "ticket.html",
+        ticket=t,
+        service=t.service,
+        ahead=people_ahead(t),
+    )
 
 @app.get("/queue/<int:ticket_id>/status.json")
 def ticket_status(ticket_id):
-    t = next((t for t in TICKETS if t["number"] == ticket_id), None)
-    if t is None:
-        abort(404)
-    ahead = sum(1 for x in TICKETS
-                if x["service_id"] == t["service_id"]
-                and x["status"] == "waiting" and x["number"] < t["number"])
-    return {"status": t["status"], "ahead": ahead}
+    t = db.get_or_404(Ticket, ticket_id)
+    return {"status": t.status, "ahead": people_ahead(t)}
+
+
+def people_ahead(t):
+    """Count waiting tickets for the same service that joined before t."""
+    stmt = (
+        db.select(func.count())
+        .select_from(Ticket)
+        .where(
+            Ticket.service_id == t.service_id,
+            Ticket.status == "waiting",
+            Ticket.created_at < t.created_at,
+        )
+    )
+    return db.session.scalar(stmt)
 
 @app.post("/queue/<int:ticket_id>/leave")
 def leave_queue(ticket_id):
@@ -142,18 +158,28 @@ def staff_dashboard():
     service_id = request.args.get("service_id", type=int)
     page = max(request.args.get("page", 1, type=int), 1)
     page_size = 10
-    queue = [t for t in TICKETS if t["status"] in ("waiting", "called")]
+    stmt = (
+        db.select(Ticket)
+        .where(Ticket.status.in_(["waiting", "called"]))
+        .order_by(Ticket.created_at)
+    )
     if service_id:
-        queue = [t for t in queue if t["service_id"] == service_id]
-    queue.sort(key=lambda t: t["number"])
+        stmt = stmt.where(Ticket.service_id == service_id)
+    queue = db.session.scalars(stmt).all()
     total_pages = max((len(queue) + page_size - 1) // page_size, 1)
     page = min(page, total_pages)
     start = (page - 1) * page_size
     page_queue = queue[start:start + page_size]
-    names = {s["id"]: s["name"] for s in SERVICES}
-    return render_template("staff.html", queue=queue, page_queue=page_queue,
-                           services=SERVICES, names=names, selected=service_id,
-                           page=page, page_size=page_size, total_pages=total_pages)
+    return render_template(
+        "staff.html",
+        queue=queue,
+        page_queue=page_queue,
+        services=all_services(),
+        selected=service_id,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages,
+    )
 
 
 @app.post("/staff/tickets/<int:ticket_id>/<action>")
