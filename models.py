@@ -20,7 +20,7 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, Identity(), primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, Identity(always=True), primary_key=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     mobile_number: Mapped[str | None] = mapped_column(String(11), unique=True)
     role: Mapped[str] = mapped_column(
@@ -51,7 +51,7 @@ class User(db.Model):
 class Service(db.Model):
     __tablename__ = "services"
 
-    id: Mapped[int] = mapped_column(Integer, Identity(), primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, Identity(always=True), primary_key=True)
     name: Mapped[str] = mapped_column(String(80), nullable=False, unique=True)
     active: Mapped[bool] = mapped_column(
         Boolean,
@@ -66,7 +66,7 @@ class Service(db.Model):
 class Ticket(db.Model):
     __tablename__ = "tickets"
 
-    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="RESTRICT"),
         nullable=False,

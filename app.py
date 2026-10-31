@@ -24,6 +24,18 @@ app.config["SQLALCHEMY_ECHO"] = os.environ.get("SQLALCHEMY_ECHO") == "1"
 db.init_app(app)
 migrate = Migrate(app, db)
 
+@app.cli.command("seed")
+def seed():
+    """Add LaundryQ's starting services if they are not there yet."""
+    starting = ("Wash and dry", "Wash only", "Dry only")
+    for name in starting:
+        exists = db.session.scalar(db.select(Service).filter_by(name=name))
+        if exists is None:
+            db.session.add(Service(name=name))
+    db.session.commit()
+    print("Services are ready.")
+
+
 SERVICES = [
     {"id": 1, "name": "Wash and dry"},
     {"id": 2, "name": "Wash only"},
