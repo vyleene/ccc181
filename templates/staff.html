@@ -86,7 +86,7 @@
               <tbody>
                 {% for ticket in page_queue %}
                   <tr>
-                    <th scope="row">#{{ ticket.number }}</th>
+                    <th scope="row">#{{ ticket.id }}</th>
                     <td>{{ ticket.name }}</td>
                     <td>{{ names[ticket.service_id] }}</td>
                     <td>
@@ -99,14 +99,14 @@
                     <td>
                       <div class="d-flex flex-wrap gap-2 staff-table-actions">
                         <form method="post"
-                            action="{{ url_for('staff_action', ticket_id=ticket.number, action='serve') }}">
+                            action="{{ url_for('staff_action', ticket_id=ticket.id, action='serve') }}">
                           <button class="btn btn-sm btn-success" type="submit"
-                              aria-label="Mark ticket {{ ticket.number }} as served">Mark as served</button>
+                              aria-label="Mark ticket {{ ticket.id }} as served">Mark as served</button>
                         </form>
                         <form method="post"
-                            action="{{ url_for('staff_action', ticket_id=ticket.number, action='no-show') }}">
+                            action="{{ url_for('staff_action', ticket_id=ticket.id, action='no-show') }}">
                           <button class="btn btn-sm btn-outline-danger" type="submit"
-                              aria-label="Mark ticket {{ ticket.number }} as no-show">No-show</button>
+                              aria-label="Mark ticket {{ ticket.id }} as no-show">No-show</button>
                         </form>
                       </div>
                     </td>

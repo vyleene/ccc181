@@ -4,12 +4,12 @@ Run it with:
     flask --app app run --debug
 then open http://127.0.0.1:5000
 """
-import os, re
+import os
+import re
 
 from dotenv import load_dotenv
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 from flask_migrate import Migrate
-from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from models import Service, Ticket, User, db
@@ -36,31 +36,11 @@ def seed():
     print("Services are ready.")
 
 
-SERVICES = [
-    {"id": 1, "name": "Wash and dry"},
-    {"id": 2, "name": "Wash only"},
-    {"id": 3, "name": "Dry only"},
-]
-
-TICKETS = [
-    {"number": 1, "name": "Mika Santos", "mobile_number": "09123456789", "service_id": 1, "status": "waiting"},
-    {"number": 2, "name": "Carlo Reyes", "mobile_number": "09123456780", "service_id": 1, "status": "waiting"},
-    {"number": 3, "name": "Nena Dela Cruz", "mobile_number": "09123456781", "service_id": 2, "status": "waiting"},
-    {"number": 4, "name": "Jun Bautista", "mobile_number": "09123456782", "service_id": 2, "status": "called"},
-    {"number": 5, "name": "Bea Navarro", "mobile_number": "09123456783", "service_id": 3, "status": "waiting"},
-    {"number": 6, "name": "Ana Villanueva", "mobile_number": "09123456784", "service_id": 1, "status": "waiting"},
-    {"number": 7, "name": "Rafael Mendoza", "mobile_number": "09123456785", "service_id": 2, "status": "waiting"},
-    {"number": 8, "name": "Liza Fernandez", "mobile_number": "09123456786", "service_id": 3, "status": "waiting"},
-    {"number": 9, "name": "Marco Dizon", "mobile_number": "09123456787", "service_id": 1, "status": "called"},
-    {"number": 10, "name": "Sofia Aguilar", "mobile_number": "09123456788", "service_id": 2, "status": "waiting"}
-]
-
-
 @app.route("/")
 def index():
     # render_template looks inside the templates/ folder and passes
     # keyword arguments to the template as variables.
-    return render_template("index.html", name="Ana", tickets=TICKETS)
+    return render_template("index.html", name="Ana")
 
 
 @app.get("/queue/<int:ticket_id>")
@@ -96,9 +76,15 @@ def leave_queue(ticket_id):
     return redirect(url_for("index"))
 
 
+def all_services():
+    return db.session.scalars(
+        db.select(Service).where(Service.active.is_(True)).order_by(Service.name)
+    ).all()
+
+
 @app.get("/join")
 def join_form():
-    return render_template("join.html", services=SERVICES, form={})
+    return render_template("join.html", services=all_services(), form={})
 
 
 @app.post("/join")
@@ -109,22 +95,46 @@ def join():
     service_id = form.get("service_id", type=int)
 
     errors = {}
-    if not name:
-        errors["name"] = "Enter your name."
+    if not name or len(name) > 120:
+        errors["name"] = "Enter your name (up to 120 characters)."
     if not re.fullmatch(r"09\d{9}", mobile_number):
         errors["mobile_number"] = "Enter an 11-digit mobile number starting with 09."
-    if service_id not in [s["id"] for s in SERVICES]:
+    service = db.session.get(Service, service_id) if service_id else None
+    if service is None or not service.active:
         errors["service_id"] = "Choose a service."
 
     if errors:
         flash("Please fix the highlighted fields.", "danger")
-        return render_template("join.html", services=SERVICES, form=form, errors=errors), 400
+        return render_template(
+            "join.html",
+            services=all_services(),
+            form=form,
+            errors=errors,
+        ), 400
 
-    number = TICKETS[-1]["number"] + 1 if TICKETS else 1
-    TICKETS.append({"number": number, "name": name, "mobile_number": mobile_number,
-                    "service_id": service_id, "status": "waiting"})
-    flash(f"You joined the queue. Your ticket is #{number}.", "success")
-    return redirect(url_for("ticket", ticket_id=number))
+    user = db.session.scalar(
+        db.select(User).filter_by(mobile_number=mobile_number)
+    )
+    if user is None:
+        user = User(name=name, mobile_number=mobile_number)
+        db.session.add(user)
+
+    ticket = Ticket(user=user, service=service)
+    db.session.add(ticket)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        flash("Something went wrong saving your ticket. Please try again.", "danger")
+        return render_template(
+            "join.html",
+            services=all_services(),
+            form=form,
+            errors={},
+        ), 409
+
+    flash(f"You joined the queue. Your ticket is #{ticket.id}.", "success")
+    return redirect(url_for("ticket", ticket_id=ticket.id))
 
 
 @app.get("/staff")
