@@ -19,6 +19,14 @@
         </div>
 
         <div id="live-status" aria-live="polite">
+          <div class="d-flex flex-column flex-sm-row align-items-sm-center
+              justify-content-between gap-2 text-start mb-3">
+            <span id="notification-status" class="text-secondary small">
+              Enable notifications to know when you are called.
+            </span>
+            <button id="enable-notifications" class="btn btn-sm btn-warning"
+                type="button">Enable</button>
+          </div>
           <div class="row row-cols-1 row-cols-sm-2 g-2 mb-3">
             <div class="col">
               <div class="ticket-status-panel h-100 p-2">
@@ -83,6 +91,65 @@
   const statusBadge = document.getElementById("ticket-status");
   const positionText = document.getElementById("ticket-position");
   const leaveQueueForm = document.getElementById("leave-queue-form");
+  const enableNotificationsButton = document.getElementById("enable-notifications");
+  const notificationStatus = document.getElementById("notification-status");
+  let previousStatus = "{{ ticket.status }}";
+
+  function updateNotificationControls() {
+    if (!("Notification" in window)) {
+      enableNotificationsButton.hidden = true;
+      notificationStatus.textContent = "Browser notifications are not supported.";
+      return;
+    }
+
+    if (Notification.permission === "granted") {
+      enableNotificationsButton.hidden = true;
+      notificationStatus.textContent = "Browser notifications are enabled.";
+    } else if (Notification.permission === "denied") {
+      enableNotificationsButton.disabled = true;
+      notificationStatus.textContent =
+        "Notifications are blocked.";
+    }
+  }
+
+  enableNotificationsButton.addEventListener("click", async () => {
+    if (!("Notification" in window)) {
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      notificationStatus.textContent = "Browser notifications are enabled.";
+      enableNotificationsButton.hidden = true;
+    } else if (permission === "denied") {
+      notificationStatus.textContent =
+        "Notifications are blocked.";
+      enableNotificationsButton.disabled = true;
+    } else {
+      notificationStatus.textContent = "Notification permission was not granted.";
+    }
+  });
+
+  function notifyCalled() {
+    if (!("Notification" in window)) {
+      return;
+    }
+
+    if (Notification.permission !== "granted") {
+      return;
+    }
+
+    const notification = new Notification("LaundryQ: your turn is ready", {
+      body: "Please go to the laundry area.",
+      tag: `laundryq-ticket-${"{{ ticket.id }}"}`,
+    });
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+    };
+  }
+
+  updateNotificationControls();
 
   function updatePosition(ahead) {
     if (ahead === 0) {
@@ -117,6 +184,11 @@
       statusBadge.classList.remove(...statusClasses);
       statusBadge.classList.add(`ticket-status-${data.status}`);
       updatePosition(data.ahead);
+
+      if (previousStatus === "waiting" && data.status === "called") {
+        notifyCalled();
+      }
+      previousStatus = data.status;
 
       if (leaveQueueForm) {
         leaveQueueForm.hidden = !["waiting", "called"].includes(data.status);
