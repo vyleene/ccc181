@@ -1,9 +1,5 @@
-"""CCC181 Week 2: a "Hello, Flask" starter app.
+"""LaundryQ Flask application."""
 
-Run it with:
-    flask --app app run --debug
-then open http://127.0.0.1:5000
-"""
 import os
 import re
 from datetime import timedelta, timezone
@@ -25,112 +21,119 @@ app.config["SQLALCHEMY_ECHO"] = os.environ.get("SQLALCHEMY_ECHO") == "1"
 
 db.init_app(app)
 migrate = Migrate(app, db)
-PH_TIME = timezone(timedelta(hours=8))
 
+PH_TIME = timezone(timedelta(hours=8))
+PAGE_SIZE = 10
+STAFF_ACTIONS = {
+    "call": "called",
+    "serve": "served",
+    "no-show": "no-show",
+}
+
+# ---------------------------------------------------------------------------
+# Template helpers and CLI commands
+# ---------------------------------------------------------------------------
 
 @app.template_filter("local")
 def local_time(value):
-    """Show a database time in Philippine time."""
-    return value.astimezone(PH_TIME).strftime("%b %d, %I:%M %p") if value else ""
+    """Format a database timestamp in Philippine time."""
+    if value is None:
+        return ""
+    return value.astimezone(PH_TIME).strftime("%b %d, %I:%M %p")
+
 
 @app.cli.command("seed")
 def seed():
-    """Add LaundryQ's starting services if they are not there yet."""
-    starting = ("Wash and dry", "Wash only", "Dry only")
-    for name in starting:
-        exists = db.session.scalar(db.select(Service).filter_by(name=name))
-        if exists is None:
+    """Add LaundryQ's starting services if they are not present."""
+    starting_services = ("Wash and dry", "Wash only", "Dry only")
+
+    for name in starting_services:
+        service = db.session.scalar(
+            db.select(Service).filter_by(name=name)
+        )
+        if service is None:
             db.session.add(Service(name=name))
+
     db.session.commit()
     print("Services are ready.")
 
 
-@app.route("/")
-def index():
-    # render_template looks inside the templates/ folder and passes
-    # keyword arguments to the template as variables.
-    return render_template("index.html", name="Ana")
-
-
-@app.get("/queue/<int:ticket_id>")
-def ticket(ticket_id):
-    t = db.get_or_404(Ticket, ticket_id)
-    return render_template(
-        "ticket.html",
-        ticket=t,
-        service=t.service,
-        ahead=people_ahead(t),
-    )
-
-@app.get("/queue/<int:ticket_id>/status.json")
-def ticket_status(ticket_id):
-    t = db.get_or_404(Ticket, ticket_id)
-    return {"status": t.status, "ahead": people_ahead(t)}
-
-
-def people_ahead(t):
-    """Count waiting tickets for the same service that joined before t."""
-    stmt = (
-        db.select(func.count())
-        .select_from(Ticket)
-        .where(
-            Ticket.service_id == t.service_id,
-            Ticket.status == "waiting",
-            Ticket.created_at < t.created_at,
-        )
-    )
-    return db.session.scalar(stmt)
-
-@app.post("/queue/<int:ticket_id>/leave")
-def leave_queue(ticket_id):
-    t = db.get_or_404(Ticket, ticket_id)
-    if t.status == "waiting":
-        t.status = "left"
-        db.session.commit()
-    flash("You left the queue.", "info")
-    return redirect(url_for("index"))
-
+# ---------------------------------------------------------------------------
+# Shared database queries
+# ---------------------------------------------------------------------------
 
 def all_services():
-    return db.session.scalars(
-        db.select(Service).order_by(Service.name)
-    ).all()
+    """Return all services for staff views."""
+    statement = db.select(Service).order_by(Service.name)
+    return db.session.scalars(statement).all()
 
 
 def active_services():
-    stmt = db.select(Service).filter_by(active=True).order_by(Service.name)
-    return db.session.scalars(stmt).all()
+    """Return services currently available to residents."""
+    statement = db.select(Service).filter_by(active=True).order_by(Service.name)
+    return db.session.scalars(statement).all()
+
+
+def people_ahead(ticket):
+    """Count earlier waiting tickets for the same service."""
+    statement = (
+        db.select(func.count())
+        .select_from(Ticket)
+        .where(
+            Ticket.service_id == ticket.service_id,
+            Ticket.status == "waiting",
+            Ticket.created_at < ticket.created_at,
+        )
+    )
+    return db.session.scalar(statement)
+
+
+# ---------------------------------------------------------------------------
+# Public and resident routes
+# ---------------------------------------------------------------------------
+
+@app.get("/")
+def index():
+    """Show the LaundryQ welcome page."""
+    return render_template("index.html", name="Ana")
 
 
 @app.get("/join")
 def join_form():
+    """Show the resident queue form."""
     return render_template("join.html", services=active_services(), form={})
 
 
 @app.post("/join")
 def join():
+    """Validate the resident form and create a ticket."""
     form = request.form
     name = form.get("name", "").strip()
     mobile_number = form.get("mobile_number", "").strip()
     service_id = form.get("service_id", type=int)
+    service = db.session.get(Service, service_id) if service_id else None
 
     errors = {}
     if not name or len(name) > 120:
         errors["name"] = "Enter your name (up to 120 characters)."
     if not re.fullmatch(r"09\d{9}", mobile_number):
-        errors["mobile_number"] = "Enter an 11-digit mobile number starting with 09."
-    service = db.session.get(Service, service_id) if service_id else None
+        errors["mobile_number"] = (
+            "Enter an 11-digit mobile number starting with 09."
+        )
     if service is None or not service.active:
         errors["service_id"] = "Choose a service."
 
     if errors:
         flash("Please fix the highlighted fields.", "danger")
-        return render_template(
-            "join.html",
-            services=active_services(),
-            form=form,
-            errors=errors,
-        ), 400
+        return (
+            render_template(
+                "join.html",
+                services=active_services(),
+                form=form,
+                errors=errors,
+            ),
+            400,
+        )
 
     user = db.session.scalar(
         db.select(User).filter_by(mobile_number=mobile_number)
@@ -141,32 +144,73 @@ def join():
 
     ticket = Ticket(user=user, service=service)
     db.session.add(ticket)
+
     try:
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
         flash("Something went wrong saving your ticket. Please try again.", "danger")
-        return render_template(
-            "join.html",
-            services=active_services(),
-            form=form,
-            errors={},
-        ), 409
+        return (
+            render_template(
+                "join.html",
+                services=active_services(),
+                form=form,
+                errors={},
+            ),
+            409,
+        )
 
     flash(f"You joined the queue. Your ticket is #{ticket.id}.", "success")
     return redirect(url_for("ticket", ticket_id=ticket.id))
 
 
+@app.get("/queue/<int:ticket_id>")
+def ticket(ticket_id):
+    """Show a resident's ticket and position in line."""
+    current_ticket = db.get_or_404(Ticket, ticket_id)
+    return render_template(
+        "ticket.html",
+        ticket=current_ticket,
+        service=current_ticket.service,
+        ahead=people_ahead(current_ticket),
+    )
+
+
+@app.get("/queue/<int:ticket_id>/status.json")
+def ticket_status(ticket_id):
+    """Return the current ticket status and position as JSON."""
+    current_ticket = db.get_or_404(Ticket, ticket_id)
+    return {
+        "status": current_ticket.status,
+        "ahead": people_ahead(current_ticket),
+    }
+
+
+@app.post("/queue/<int:ticket_id>/leave")
+def leave_queue(ticket_id):
+    """Mark a waiting ticket as left without deleting its history."""
+    current_ticket = db.get_or_404(Ticket, ticket_id)
+    if current_ticket.status == "waiting":
+        current_ticket.status = "left"
+        db.session.commit()
+
+    flash("You left the queue.", "info")
+    return redirect(url_for("index"))
+
+
+# ---------------------------------------------------------------------------
+# Staff service management
+# ---------------------------------------------------------------------------
+
 @app.get("/staff/services")
 def services_list():
-    services = db.session.scalars(
-        db.select(Service).order_by(Service.name)
-    ).all()
-    return render_template("services.html", services=services)
+    """Show all services and their ticket counts."""
+    return render_template("services.html", services=all_services())
 
 
 @app.post("/staff/services")
 def service_create():
+    """Create a service from the staff management form."""
     name = request.form.get("name", "").strip()
     if not name or len(name) > 80:
         flash("Enter a service name up to 80 characters.", "danger")
@@ -179,11 +223,13 @@ def service_create():
     except IntegrityError:
         db.session.rollback()
         flash(f"A service named “{name}” already exists.", "danger")
+
     return redirect(url_for("services_list"))
 
 
 @app.post("/staff/services/<int:service_id>/edit")
 def service_edit(service_id):
+    """Update a service name and active status."""
     service = db.get_or_404(Service, service_id)
     name = request.form.get("name", "").strip()
     if not name or len(name) > 80:
@@ -192,17 +238,20 @@ def service_edit(service_id):
 
     service.name = name
     service.active = request.form.get("active") == "on"
+
     try:
         db.session.commit()
         flash(f"Service “{name}” updated.", "success")
     except IntegrityError:
         db.session.rollback()
         flash(f"A service named “{name}” already exists.", "danger")
+
     return redirect(url_for("services_list"))
 
 
 @app.post("/staff/services/<int:service_id>/delete")
 def service_delete(service_id):
+    """Delete a service only when it has no ticket history."""
     service = db.get_or_404(Service, service_id)
     if service.tickets:
         flash(
@@ -218,30 +267,37 @@ def service_delete(service_id):
     return redirect(url_for("services_list"))
 
 
+# ---------------------------------------------------------------------------
+# Staff queue routes
+# ---------------------------------------------------------------------------
+
 @app.get("/staff")
 def staff_dashboard():
+    """Show the staff queue with filtering and pagination."""
     service_id = request.args.get("service_id", type=int)
     page = max(request.args.get("page", 1, type=int), 1)
-    page_size = 10
-    call_stmt = (
+
+    call_statement = (
         db.select(Ticket)
         .where(Ticket.status.in_(["waiting", "called"]))
         .order_by(Ticket.created_at)
     )
-    call_queue = db.session.scalars(call_stmt).all()
+    call_queue = db.session.scalars(call_statement).all()
 
-    stmt = (
+    queue_statement = (
         db.select(Ticket)
         .where(Ticket.status.in_(["waiting", "called"]))
         .order_by(Ticket.created_at)
     )
     if service_id:
-        stmt = stmt.where(Ticket.service_id == service_id)
-    queue = db.session.scalars(stmt).all()
-    total_pages = max((len(queue) + page_size - 1) // page_size, 1)
+        queue_statement = queue_statement.where(Ticket.service_id == service_id)
+
+    queue = db.session.scalars(queue_statement).all()
+    total_pages = max((len(queue) + PAGE_SIZE - 1) // PAGE_SIZE, 1)
     page = min(page, total_pages)
-    start = (page - 1) * page_size
-    page_queue = queue[start:start + page_size]
+    start = (page - 1) * PAGE_SIZE
+    page_queue = queue[start:start + PAGE_SIZE]
+
     return render_template(
         "staff.html",
         queue=queue,
@@ -250,46 +306,45 @@ def staff_dashboard():
         services=all_services(),
         selected=service_id,
         page=page,
-        page_size=page_size,
+        page_size=PAGE_SIZE,
         total_pages=total_pages,
     )
 
 
-STAFF_ACTIONS = {"call": "called", "serve": "served", "no-show": "no-show"}
-
-
 @app.post("/staff/tickets/<int:ticket_id>/<action>")
 def staff_action(ticket_id, action):
+    """Apply a staff action to the selected ticket."""
     new_status = STAFF_ACTIONS.get(action)
     if new_status is None:
         abort(404)
 
     if new_status == "called":
-        stmt = (
+        statement = (
             db.select(Ticket)
             .filter_by(status="waiting")
             .order_by(Ticket.created_at)
             .limit(1)
         )
-        t = db.session.scalar(stmt)
-        if t is None:
+        current_ticket = db.session.scalar(statement)
+        if current_ticket is None:
             flash("No one is waiting.", "info")
             return redirect(url_for("staff_dashboard"))
-        t.status = new_status
-        t.called_at = func.now()
+        current_ticket.status = new_status
+        current_ticket.called_at = func.now()
     else:
-        t = db.get_or_404(Ticket, ticket_id)
-        t.status = new_status
+        current_ticket = db.get_or_404(Ticket, ticket_id)
+        current_ticket.status = new_status
 
     db.session.commit()
-    flash(f"Ticket #{t.id} marked {new_status}.", "info")
+    flash(f"Ticket #{current_ticket.id} marked {new_status}.", "info")
     return redirect(url_for("staff_dashboard"))
 
 
 @app.post("/staff/tickets/<int:ticket_id>/delete")
 def delete_ticket(ticket_id):
-    t = db.get_or_404(Ticket, ticket_id)
-    db.session.delete(t)
+    """Permanently delete a ticket after confirmation in the browser."""
+    current_ticket = db.get_or_404(Ticket, ticket_id)
+    db.session.delete(current_ticket)
     db.session.commit()
     flash(f"Ticket #{ticket_id} was deleted.", "warning")
     return redirect(url_for("staff_dashboard"))
@@ -297,10 +352,9 @@ def delete_ticket(ticket_id):
 
 @app.route("/hello")
 def hello():
-    # The plain-string version from the Routes slide.
+    """Return the starter route response."""
     return "Hello, CCC181!"
 
 
 if __name__ == "__main__":
-    # Lets you also start the app with: python app.py
     app.run(debug=True)
