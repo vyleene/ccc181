@@ -5,7 +5,16 @@ import re
 from datetime import timedelta, timezone
 
 from dotenv import load_dotenv
-from flask import Flask, abort, flash, redirect, render_template, request, url_for
+from flask import (
+    Flask,
+    abort,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask_migrate import Migrate
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -88,6 +97,25 @@ def people_ahead(ticket):
     return db.session.scalar(statement)
 
 
+def session_ticket():
+    """Return the resident's active ticket, if one is stored in the session."""
+    ticket_id = session.get("ticket_id")
+    if ticket_id is None:
+        return None
+
+    ticket = db.session.get(Ticket, ticket_id)
+    if ticket is None or ticket.status not in ("waiting", "called"):
+        session.pop("ticket_id", None)
+        return None
+    return ticket
+
+
+@app.context_processor
+def inject_session_ticket():
+    """Make the resident's active ticket available to every template."""
+    return {"my_ticket": session_ticket()}
+
+
 # ---------------------------------------------------------------------------
 # Public and resident routes
 # ---------------------------------------------------------------------------
@@ -101,12 +129,19 @@ def index():
 @app.get("/join")
 def join_form():
     """Show the resident queue form."""
+    current_ticket = session_ticket()
+    if current_ticket is not None:
+        return redirect(url_for("ticket", ticket_id=current_ticket.id))
     return render_template("join.html", services=active_services(), form={})
 
 
 @app.post("/join")
 def join():
     """Validate the resident form and create a ticket."""
+    current_ticket = session_ticket()
+    if current_ticket is not None:
+        return redirect(url_for("ticket", ticket_id=current_ticket.id))
+
     form = request.form
     name = form.get("name", "").strip()
     mobile_number = form.get("mobile_number", "").strip()
@@ -160,6 +195,7 @@ def join():
             409,
         )
 
+    session["ticket_id"] = ticket.id
     flash(f"You joined the queue. Your ticket is #{ticket.id}.", "success")
     return redirect(url_for("ticket", ticket_id=ticket.id))
 
@@ -193,6 +229,8 @@ def leave_queue(ticket_id):
     if current_ticket.status == "waiting":
         current_ticket.status = "left"
         db.session.commit()
+    if session.get("ticket_id") == ticket_id:
+        session.pop("ticket_id", None)
 
     flash("You left the queue.", "info")
     return redirect(url_for("index"))
@@ -277,22 +315,15 @@ def staff_dashboard():
     service_id = request.args.get("service_id", type=int)
     page = max(request.args.get("page", 1, type=int), 1)
 
-    call_statement = (
-        db.select(Ticket)
-        .where(Ticket.status.in_(["waiting", "called"]))
-        .order_by(Ticket.created_at)
-    )
-    call_queue = db.session.scalars(call_statement).all()
-
-    queue_statement = (
+    statement = (
         db.select(Ticket)
         .where(Ticket.status.in_(["waiting", "called"]))
         .order_by(Ticket.created_at)
     )
     if service_id:
-        queue_statement = queue_statement.where(Ticket.service_id == service_id)
+        statement = statement.where(Ticket.service_id == service_id)
 
-    queue = db.session.scalars(queue_statement).all()
+    queue = db.session.scalars(statement).all()
     total_pages = max((len(queue) + PAGE_SIZE - 1) // PAGE_SIZE, 1)
     page = min(page, total_pages)
     start = (page - 1) * PAGE_SIZE
@@ -301,7 +332,6 @@ def staff_dashboard():
     return render_template(
         "staff.html",
         queue=queue,
-        call_queue=call_queue,
         page_queue=page_queue,
         services=all_services(),
         selected=service_id,
@@ -319,16 +349,15 @@ def staff_action(ticket_id, action):
         abort(404)
 
     if new_status == "called":
-        statement = (
-            db.select(Ticket)
-            .filter_by(status="waiting")
-            .order_by(Ticket.created_at)
-            .limit(1)
-        )
-        current_ticket = db.session.scalar(statement)
-        if current_ticket is None:
-            flash("No one is waiting.", "info")
-            return redirect(url_for("staff_dashboard"))
+        current_ticket = db.get_or_404(Ticket, ticket_id)
+        if current_ticket.status != "waiting":
+            flash("That ticket is no longer waiting.", "info")
+            return redirect(
+                url_for(
+                    "staff_dashboard",
+                    service_id=request.args.get("service_id", type=int),
+                )
+            )
         current_ticket.status = new_status
         current_ticket.called_at = func.now()
     else:
@@ -337,7 +366,12 @@ def staff_action(ticket_id, action):
 
     db.session.commit()
     flash(f"Ticket #{current_ticket.id} marked {new_status}.", "info")
-    return redirect(url_for("staff_dashboard"))
+    return redirect(
+        url_for(
+            "staff_dashboard",
+            service_id=request.args.get("service_id", type=int),
+        )
+    )
 
 
 @app.post("/staff/tickets/<int:ticket_id>/delete")

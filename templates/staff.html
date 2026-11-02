@@ -3,7 +3,7 @@
 {% block title %}Staff dashboard · LaundryQ{% endblock %}
 
 {% block content %}
-  {% set next_ticket = call_queue|selectattr("status", "equalto", "waiting")|first %}
+  {% set next_ticket = queue|selectattr("status", "equalto", "waiting")|first %}
   <section class="staff-page">
     <header class="mb-4">
       <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
@@ -38,7 +38,8 @@
             </div>
             <div class="col-md-3 text-center">
               <form method="post"
-                  action="{{ url_for('staff_action', ticket_id=next_ticket.id, action='call') }}">
+                  action="{{ url_for('staff_action', ticket_id=next_ticket.id, action='call',
+                                     service_id=selected) }}">
                 <button class="btn btn-laundry btn-lg px-4" type="submit">Call Next</button>
               </form>
             </div>
