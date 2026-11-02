@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Ticket #{{ ticket.number }} · LaundryQ{% endblock %}
+{% block title %}Ticket #{{ ticket.id }} · LaundryQ{% endblock %}
 
 {% block content %}
   <div class="ticket-page d-flex align-items-center justify-content-center">
-    <article class="card ticket-card border-0 shadow-sm overflow-hidden">
+    <article class="card ticket-card border-0 rounded-4 bg-white shadow-sm overflow-hidden">
       <div class="ticket-card-header text-center px-4 px-md-5 py-3">
         <span class="small fw-bold text-uppercase">LaundryQ Ticket</span>
       </div>
 
       <div class="card-body p-4 p-md-5 text-center">
         <p class="eyebrow text-uppercase fw-semibold mb-3">Your ticket number</p>
-        <div class="ticket-number mb-4">#{{ ticket.number }}</div>
+        <div class="ticket-number mb-4">#{{ ticket.id }}</div>
 
         <div class="ticket-service mb-4">
           <p class="text-secondary small text-uppercase fw-semibold mb-1">Selected service</p>
@@ -19,6 +19,14 @@
         </div>
 
         <div id="live-status" aria-live="polite">
+          <div class="d-flex flex-column flex-sm-row align-items-sm-center
+              justify-content-between gap-2 text-start mb-3">
+            <span id="notification-status" class="text-secondary small">
+              Enable notifications to know when you are called.
+            </span>
+            <button id="enable-notifications" class="btn btn-sm btn-warning"
+                type="button">Enable</button>
+          </div>
           <div class="row row-cols-1 row-cols-sm-2 g-2 mb-3">
             <div class="col">
               <div class="ticket-status-panel h-100 p-2">
@@ -54,18 +62,22 @@
           <div class="ticket-details text-start p-2 mb-3">
             <div class="d-flex justify-content-between gap-3">
               <span class="text-secondary">Name</span>
-              <strong>{{ ticket.name }}</strong>
+              <strong>{{ ticket.user.name }}</strong>
             </div>
             <div class="d-flex justify-content-between gap-3 mt-1">
               <span class="text-secondary">Mobile number</span>
-              <strong>{{ ticket.mobile_number }}</strong>
+              <strong>{{ ticket.user.mobile_number }}</strong>
+            </div>
+            <div class="d-flex justify-content-between gap-3 mt-1">
+              <span class="text-secondary">Joined</span>
+              <strong>{{ ticket.created_at|local }}</strong>
             </div>
           </div>
         </div>
 
         {% if ticket.status in ["waiting", "called"] %}
           <form id="leave-queue-form" class="ticket-action" method="post"
-              action="{{ url_for('leave_queue', ticket_id=ticket.number) }}">
+              action="{{ url_for('leave_queue', ticket_id=ticket.id) }}">
             <button class="btn btn-danger btn-lg w-100" type="submit">Leave the queue</button>
           </form>
         {% endif %}
@@ -75,10 +87,69 @@
 {% endblock %}
 {% block scripts %}
 <script>
-  const statusUrl = "{{ url_for('ticket_status', ticket_id=ticket.number) }}";
+  const statusUrl = "{{ url_for('ticket_status', ticket_id=ticket.id) }}";
   const statusBadge = document.getElementById("ticket-status");
   const positionText = document.getElementById("ticket-position");
   const leaveQueueForm = document.getElementById("leave-queue-form");
+  const enableNotificationsButton = document.getElementById("enable-notifications");
+  const notificationStatus = document.getElementById("notification-status");
+  let previousStatus = "{{ ticket.status }}";
+
+  function updateNotificationControls() {
+    if (!("Notification" in window)) {
+      enableNotificationsButton.hidden = true;
+      notificationStatus.textContent = "Browser notifications are not supported.";
+      return;
+    }
+
+    if (Notification.permission === "granted") {
+      enableNotificationsButton.hidden = true;
+      notificationStatus.textContent = "Browser notifications are enabled.";
+    } else if (Notification.permission === "denied") {
+      enableNotificationsButton.disabled = true;
+      notificationStatus.textContent =
+        "Notifications are blocked.";
+    }
+  }
+
+  enableNotificationsButton.addEventListener("click", async () => {
+    if (!("Notification" in window)) {
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      notificationStatus.textContent = "Browser notifications are enabled.";
+      enableNotificationsButton.hidden = true;
+    } else if (permission === "denied") {
+      notificationStatus.textContent =
+        "Notifications are blocked.";
+      enableNotificationsButton.disabled = true;
+    } else {
+      notificationStatus.textContent = "Notification permission was not granted.";
+    }
+  });
+
+  function notifyCalled() {
+    if (!("Notification" in window)) {
+      return;
+    }
+
+    if (Notification.permission !== "granted") {
+      return;
+    }
+
+    const notification = new Notification("LaundryQ: your turn is ready", {
+      body: "Please go to the laundry area.",
+      tag: `laundryq-ticket-${"{{ ticket.id }}"}`,
+    });
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+    };
+  }
+
+  updateNotificationControls();
 
   function updatePosition(ahead) {
     if (ahead === 0) {
@@ -113,6 +184,11 @@
       statusBadge.classList.remove(...statusClasses);
       statusBadge.classList.add(`ticket-status-${data.status}`);
       updatePosition(data.ahead);
+
+      if (previousStatus === "waiting" && data.status === "called") {
+        notifyCalled();
+      }
+      previousStatus = data.status;
 
       if (leaveQueueForm) {
         leaveQueueForm.hidden = !["waiting", "called"].includes(data.status);

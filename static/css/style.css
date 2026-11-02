@@ -30,9 +30,6 @@ body {
 }
 
 .footer-container {
-  width: 100%;
-  background: #ffffff;
-  color: #55717b;
   box-shadow: 0 -4px 10px rgba(18, 59, 82, 0.12);
 }
 
@@ -43,11 +40,6 @@ body {
 
 .staff-page {
   padding: 1rem 0 2rem;
-}
-
-.staff-call-card {
-  border-radius: 1rem;
-  background: #ffffff;
 }
 
 .staff-call-details {
@@ -79,8 +71,6 @@ body {
 
 .staff-empty-state {
   border: 1px dashed #b8cdd2;
-  border-radius: 0.85rem;
-  background: #ffffff;
 }
 
 .staff-empty-icon {
@@ -94,44 +84,6 @@ body {
   color: #27815a;
   font-size: 1.5rem;
   font-weight: 700;
-}
-
-.staff-table-responsive {
-  min-width: 0;
-  max-height: 25rem;
-  overflow-x: auto;
-  overflow-y: auto;
-  width: 100%;
-}
-
-.staff-queue-card {
-  overflow: hidden;
-}
-
-.staff-table {
-  width: 100%;
-  table-layout: fixed;
-  margin: 0;
-}
-
-.staff-table th,
-.staff-table td {
-  padding: 0.75rem 1rem;
-  text-align: center;
-  overflow-wrap: anywhere;
-}
-
-.staff-table-actions {
-  justify-content: center;
-}
-
-.staff-table-actions .btn {
-  min-height: 2.75rem;
-}
-
-.staff-table-actions,
-.staff-table-actions form {
-  min-width: 0;
 }
 
 .pagination .page-link {
@@ -169,20 +121,9 @@ body {
     text-align: center;
   }
 
-  .staff-table th,
-  .staff-table td {
-    padding: 0.65rem 0.75rem;
-  }
-
-  .staff-table {
-    min-width: 42rem;
-    table-layout: auto;
-  }
-
   .staff-call-card .btn {
     width: 100%;
   }
-
 }
 
 .join-page {
@@ -192,7 +133,6 @@ body {
 
 .join-card {
   width: min(100%, 34rem);
-  border-radius: 1rem;
 }
 
 .join-card .form-control,
@@ -213,8 +153,6 @@ body {
 
 .ticket-card {
   width: min(100%, 34rem);
-  border-radius: 1rem;
-  background: #ffffff;
   box-shadow: 0 1rem 2.5rem rgba(18, 59, 82, 0.12) !important;
 }
 
@@ -278,7 +216,6 @@ body {
 
 .ticket-status-called {
   background: #d89100;
-  color: #ffffff;
 }
 
 .ticket-status-served {
@@ -286,6 +223,10 @@ body {
 }
 
 .ticket-status-no-show {
+  background: #dc3545;
+}
+
+.ticket-status-left {
   background: #687980;
 }
 
