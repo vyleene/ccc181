@@ -223,6 +223,13 @@ def staff_dashboard():
     service_id = request.args.get("service_id", type=int)
     page = max(request.args.get("page", 1, type=int), 1)
     page_size = 10
+    call_stmt = (
+        db.select(Ticket)
+        .where(Ticket.status.in_(["waiting", "called"]))
+        .order_by(Ticket.created_at)
+    )
+    call_queue = db.session.scalars(call_stmt).all()
+
     stmt = (
         db.select(Ticket)
         .where(Ticket.status.in_(["waiting", "called"]))
@@ -238,6 +245,7 @@ def staff_dashboard():
     return render_template(
         "staff.html",
         queue=queue,
+        call_queue=call_queue,
         page_queue=page_queue,
         services=all_services(),
         selected=service_id,

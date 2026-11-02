@@ -9,7 +9,7 @@
         <h1 class="h2 fw-bold mb-1">Manage services</h1>
         <p class="text-secondary mb-0">Add, update, or switch off laundry services.</p>
       </div>
-      <a class="btn btn-outline-secondary align-self-start" href="{{ url_for('staff_dashboard') }}">
+      <a class="btn btn-secondary align-self-start" href="{{ url_for('staff_dashboard') }}">
         Back to dashboard
       </a>
     </header>
@@ -30,25 +30,27 @@
       </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+      <div class="card-header bg-white gap-3 px-3 py-3 text-center">
+        <h2 class="h5 mb-0">Services</h2>
+      </div>
       <div class="card-body p-0">
         {% if services %}
           <div class="table-responsive">
-            <table class="table table-striped align-middle mb-0">
+            <table class="table align-middle text-nowrap mb-0">
               <caption class="visually-hidden">Laundry services</caption>
               <thead>
                 <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Tickets</th>
-                  <th scope="col">Update</th>
-                  <th scope="col">Delete</th>
+                  <th class="text-center" scope="col">Name</th>
+                  <th class="text-center" scope="col">Status</th>
+                  <th class="text-center" scope="col">Tickets</th>
+                  <th class="text-center" scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {% for service in services %}
                   <tr>
-                    <td>
+                    <td class="text-center">
                       <form method="post" action="{{ url_for('service_edit', service_id=service.id) }}"
                           id="edit-service-{{ service.id }}">
                         <label class="visually-hidden" for="service-name-{{ service.id }}">
@@ -59,6 +61,7 @@
                       </form>
                     </td>
                     <td>
+                      <div class="d-flex justify-content-center">
                       <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="active" value="on"
                             id="service-active-{{ service.id }}" form="edit-service-{{ service.id }}"
@@ -67,19 +70,20 @@
                           Active
                         </label>
                       </div>
+                      </div>
                     </td>
-                    <td>{{ service.tickets|length }}</td>
-                    <td>
-                      <button class="btn btn-sm btn-outline-primary"
-                          type="submit" form="edit-service-{{ service.id }}">Save</button>
-                    </td>
-                    <td>
-                      <form method="post"
-                          action="{{ url_for('service_delete', service_id=service.id) }}"
-                          data-confirm="Delete {{ service.name }}? This cannot be undone.">
-                        <button class="btn btn-sm btn-outline-danger" type="submit"
-                            {% if service.tickets %}disabled{% endif %}>Delete</button>
-                      </form>
+                    <td class="text-center">{{ service.tickets|length }}</td>
+                    <td class="text-center">
+                      <div class="d-flex justify-content-center gap-2">
+                        <button class="btn btn-sm btn-primary"
+                            type="submit" form="edit-service-{{ service.id }}">Save</button>
+                        <form method="post"
+                            action="{{ url_for('service_delete', service_id=service.id) }}"
+                            data-confirm="Delete {{ service.name }}? This cannot be undone.">
+                          <button class="btn btn-sm btn-danger" type="submit"
+                              {% if service.tickets %}disabled{% endif %}>Delete</button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 {% endfor %}
