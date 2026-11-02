@@ -62,6 +62,4 @@ performance, accessibility, and security needed for a usable first release.
 
 | Who (role only, no full name) | What they said | What I changed |
 | --- | --- | --- |
-| Student boarder | “I need to know roughly when my turn will come so I can go back to my room and study.” | Expanded FR-02 to require an estimated wait and moved it to This week. |
 | Dental student | “The queue needs to show a fair order and each person's service.” | Kept FR-05 as a Must requirement for an ordered queue with names, services, and statuses. |
-| Usability-test participant | “The task was easy, but the screen did not show an estimated time and the staff action wording caused hesitation.” | Added estimated wait to FR-02 and changed the staff action label to “Mark as served.” |

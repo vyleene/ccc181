@@ -18,10 +18,9 @@ management, persistence, integrity, performance, accessibility, and security.
 The complete list is in [docs/requirements.md](../requirements.md).
 
 The person waiting in the setting said they needed to know roughly when their
-turn would come so they could return to their room and study. I made estimated
-wait and queue position part of FR-02. A second review emphasized fair order
-and each person's service, so the staff queue shows ticket order, names,
-services, and statuses.
+turn would come so they could return to their room and study. I queue position 
+part of FR-02. A second review emphasized fair orderand each person's service, 
+so the staff queue shows ticket order, names, services, and statuses.
 
 ## ERD
 
