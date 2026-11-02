@@ -317,7 +317,9 @@ def staff_dashboard():
 
     statement = (
         db.select(Ticket)
-        .where(Ticket.status.in_(["waiting", "called"]))
+        .where(
+            Ticket.status.in_(["waiting", "called", "served", "no-show", "left"])
+        )
         .order_by(Ticket.created_at)
     )
     if service_id:

@@ -101,8 +101,14 @@
                     <td class="text-center">
                       {% if ticket.status == "waiting" %}
                         <span class="badge ticket-status-waiting">Waiting</span>
-                      {% else %}
+                      {% elif ticket.status == "called" %}
                         <span class="badge ticket-status-called">Called</span>
+                      {% elif ticket.status == "served" %}
+                        <span class="badge ticket-status-served">Served</span>
+                      {% elif ticket.status == "no-show" %}
+                        <span class="badge ticket-status-no-show">No-show</span>
+                      {% else %}
+                        <span class="badge ticket-status-left">Left</span>
                       {% endif %}
                     </td>
                     <td>
@@ -110,12 +116,18 @@
                         <form class="d-inline" method="post"
                             action="{{ url_for('staff_action', ticket_id=ticket.id, action='serve') }}">
                           <button class="btn btn-sm btn-success" type="submit"
-                              aria-label="Mark ticket {{ ticket.id }} as served">Mark as served</button>
+                              aria-label="Mark ticket {{ ticket.id }} as served"
+                              {% if ticket.status not in ["waiting", "called"] %}disabled{% endif %}>
+                            Mark as served
+                          </button>
                         </form>
                         <form class="d-inline" method="post"
                             action="{{ url_for('staff_action', ticket_id=ticket.id, action='no-show') }}">
                           <button class="btn btn-sm btn-danger" type="submit"
-                              aria-label="Mark ticket {{ ticket.id }} as no-show">No-show</button>
+                              aria-label="Mark ticket {{ ticket.id }} as no-show"
+                              {% if ticket.status not in ["waiting", "called"] %}disabled{% endif %}>
+                            No-show
+                          </button>
                         </form>
                         <form class="d-inline" method="post"
                             action="{{ url_for('delete_ticket', ticket_id=ticket.id) }}"

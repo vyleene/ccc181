@@ -216,7 +216,6 @@ body {
 
 .ticket-status-called {
   background: #d89100;
-  color: #ffffff;
 }
 
 .ticket-status-served {
@@ -224,6 +223,10 @@ body {
 }
 
 .ticket-status-no-show {
+  background: #dc3545;
+}
+
+.ticket-status-left {
   background: #687980;
 }
 
